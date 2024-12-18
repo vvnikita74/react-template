@@ -1,14 +1,17 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-import path from 'path'
-import webpack, { Configuration } from 'webpack'
-import HtmlWebpackPlugin from 'html-webpack-plugin'
-import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
 import ESLintPlugin from 'eslint-webpack-plugin'
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
+import HtmlWebpackPlugin from 'html-webpack-plugin'
+import path from 'path'
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin'
+import webpack, { Configuration } from 'webpack'
 
 import 'webpack-dev-server'
 
-const webpackConfig = (env): Configuration => ({
+const webpackConfig = (env: {
+	production: string
+	development: string
+}): Configuration => ({
 	entry: './src/index.tsx',
 	...(env.production || !env.development
 		? {}
@@ -47,6 +50,21 @@ const webpackConfig = (env): Configuration => ({
 			{
 				test: /\.css$/,
 				use: ['style-loader', 'css-loader', 'postcss-loader']
+			},
+			{
+				test: /\.(png|jpe?g|gif|webp)$/i,
+				use: [
+					{
+						loader: 'file-loader',
+						options: {
+							name: '[path][name].[ext]'
+						}
+					}
+				]
+			},
+			{
+				test: /\.svg$/,
+				use: ['@svgr/webpack']
 			}
 		]
 	},
@@ -65,7 +83,9 @@ const webpackConfig = (env): Configuration => ({
 			)
 		}),
 		new ForkTsCheckerWebpackPlugin(),
-		new ESLintPlugin({ files: './src/**/*.{ts,tsx,js,jsx}' })
+		new ESLintPlugin({
+			files: './src/**/*.{ts,tsx,js,jsx}'
+		})
 	]
 })
 
